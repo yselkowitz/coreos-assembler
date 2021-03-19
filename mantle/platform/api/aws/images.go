@@ -17,6 +17,7 @@ package aws
 import (
 	"fmt"
 	"net/url"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -329,10 +330,15 @@ func (a *API) CreateImportRole(bucket string) error {
 }
 
 func (a *API) CreateHVMImage(snapshotID string, diskSizeGiB uint, name string, description string) (string, error) {
+	if runtime.GOARCH == "amd64" {
+		arch := "x86_64"
+	} else {
+		arch := runtime.GOARCH
+	}
 	return a.createImage(&ec2.RegisterImageInput{
 		Name:               aws.String(name),
 		Description:        aws.String(description),
-		Architecture:       aws.String("x86_64"),
+		Architecture:       aws.String(arch),
 		VirtualizationType: aws.String("hvm"),
 		RootDeviceName:     aws.String("/dev/xvda"),
 		BlockDeviceMappings: []*ec2.BlockDeviceMapping{
